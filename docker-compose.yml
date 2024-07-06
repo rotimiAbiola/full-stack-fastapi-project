@@ -1,0 +1,32 @@
+services:
+  app:
+    build: ./frontend
+    container_name: web_c
+    ports:
+      - '3000:3000'
+    stdin_open: true
+    tty: true
+
+  api:
+    build: ./backend
+    container_name: api_c
+    depends_on:
+    - db
+    - adminer
+    ports:
+      - '8000:8000'
+
+  db:
+    image: postgres:16.3
+    restart: always
+    volumes:
+      - postgress-db:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+volumes:
+  postgress-db:  
