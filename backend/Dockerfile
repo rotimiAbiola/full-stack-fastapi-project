@@ -5,13 +5,14 @@ ENV PYTHOONUNBUFFERED 1 \
 
 WORKDIR /usr/src/app
 
-RUN pip install poetry 
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
 COPY poetry.lock pyproject.toml ./
 RUN poetry install --without dev --no-root
 
-ENV PYTHONPATH=/usr/src/app
 COPY . .
+
+EXPOSE 8000
 
 RUN poetry run bash ./prestart.sh
 
