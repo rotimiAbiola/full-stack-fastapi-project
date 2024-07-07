@@ -30,8 +30,6 @@ ENV PYTHONPATH=/app
 
 # Make the prestart script executable
 RUN chmod +x /app/prestart.sh
-# Run any prestart scripts
-RUN poetry run bash ./prestart.sh
 
 # Expose the application port
 EXPOSE 8000
