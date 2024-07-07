@@ -22,6 +22,9 @@ RUN poetry install --no-dev --no-interaction
 # Copy the rest of the application code
 COPY . .
 
+# Set environment variables for pythonpath
+ENV PYTHONPATH=/app
+
 # Run any prestart scripts
 RUN poetry run bash ./prestart.sh
 
