@@ -16,6 +16,9 @@ ENV PATH="${PATH}:/root/.local/bin"
 # Copy the poetry.lock and pyproject.toml files
 COPY poetry.lock pyproject.toml ./
 
+# Disable virtual environment creation
+RUN poetry config virtualenvs.create false
+
 # Install dependencies using Poetry
 RUN poetry install --no-dev --no-interaction
 
