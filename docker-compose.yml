@@ -62,7 +62,7 @@ services:
     image: adminer
     restart: always
     depends_on:
-      - db
+      - postgres
       - traefik
     ports:
       - 8080:8080
