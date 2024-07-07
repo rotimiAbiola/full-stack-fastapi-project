@@ -21,8 +21,10 @@ services:
     container_name: backend_c
     restart: unless-stopped
     depends_on:
-      - db
-      - traefik
+      traefik:
+        condition: service_started
+      postgres: 
+          condition: service_healthy
     ports:
       - '8000:8000'
     env_file:
@@ -34,10 +36,14 @@ services:
       - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/redoc`))"
       - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/api`))"
 
-  db:
+  postgres:
     image: postgres:16.3
-    container_name: db
-    restart: always
+    container_name: postgres_c
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 10
     volumes:
       - postgress-db:/var/lib/postgresql/data
     env_file:
@@ -46,6 +52,11 @@ services:
       - '5432:5432'
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
 
   adminer:
     image: adminer
@@ -63,6 +74,11 @@ services:
   traefik:
     image: traefik:v3.0.4
     command: --api.insecure=true --providers.docker
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/ || exit 1"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
     ports:
       - '80:80'
       - '443:443'
