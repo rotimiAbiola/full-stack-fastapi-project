@@ -1,6 +1,6 @@
-FROM node:20-alpine3.19
+FROM node:20-alpine3.19 as build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json .
 
@@ -10,4 +10,11 @@ COPY . .
 
 EXPOSE 5173
 
-CMD [ "npm", "start" ]
+RUN npm run build
+
+FROM nginx:stable-alpine
+
+COPY --from=build /app/dist/ /usr/share/nginx/html
+
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+

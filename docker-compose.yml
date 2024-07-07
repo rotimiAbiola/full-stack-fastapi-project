@@ -11,6 +11,10 @@ services:
       - ./frontend/.env
     networks:
       - app-network
+    labels:
+      - "traefik.http.routers.site.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+    depends_on:
+      - traefik
 
   backend:
     build: ./backend
@@ -18,12 +22,17 @@ services:
     restart: unless-stopped
     depends_on:
       - db
+      - traefik
     ports:
       - '8000:8000'
     env_file:
       - ./backend/.env
     networks:
       - app-network
+    labels:
+      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/docs`))"
+      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/redoc`))"
+      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/api`))"
 
   db:
     image: postgres:16.3
@@ -43,13 +52,32 @@ services:
     restart: always
     depends_on:
       - db
+      - traefik
     ports:
       - 8080:8080
     networks:
       - app-network
+    labels:
+      - "traefik.http.routers.site.rule=Host(`db.${DOMAIN}`)" 
+
+  traefik:
+    image: traefik:v3.0.4
+    command: --api.insecure=true --providers.docker
+    ports:
+      - '80:80'
+      - '443:443'
+      - '8090:8090'
+    volumes:
+      - var/run/docker.sock:/var/run/docker.sock
+      - ./letsencrypt:/letsencrypt
+    env_file:
+      - ./backend/.env
+    labels:
+      - "traefik.http.routers.site.rule=Host(`proxy.${DOMAIN}`)"
 
 volumes:
   postgress-db:  
+  letsencrypt:
 
 networks:
   app-network:
