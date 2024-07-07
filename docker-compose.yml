@@ -1,9 +1,11 @@
+version: '3.7'
+
 services:
   frontend:
     build: ./frontend
     container_name: frontend_c
     ports:
-      - '8001:80'
+      - '80:80'
     stdin_open: true
     tty: true
     restart: unless-stopped
@@ -13,9 +15,16 @@ services:
     networks:
       - app-network
     labels:
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
-    depends_on:
-      - traefik
+      - "traefik.enable=true"
+      - "traefik.docker.network=app-network"
+      - "traefik.http.routers.frontend.rule=Host(`rtmdemos.name.ng`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend-secure.rule=Host(`rtmdemos.name.ng`)"
+      - "traefik.http.routers.frontend-secure.entrypoints=websecure"
+      - "traefik.http.routers.frontend-secure.tls=true"
+      - "traefik.http.routers.frontend-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.frontend.middlewares=redirect-to-https"
 
   backend:
     build: ./backend
@@ -31,9 +40,30 @@ services:
     networks:
       - app-network
     labels:
-      - "traefik.http.routers.backend_docs.rule=Host(`${DOMAIN}`) && PathPrefix(`/docs`)"
-      - "traefik.http.routers.backend_redoc.rule=Host(`${DOMAIN}`) && PathPrefix(`/redoc`)"
-      - "traefik.http.routers.backend_api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.enable=true"
+      - "traefik.docker.network=app-network"
+      - "traefik.http.routers.backend-api.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend-api.entrypoints=web"
+      - "traefik.http.routers.backend-api-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend-api-secure.entrypoints=websecure"
+      - "traefik.http.routers.backend-api-secure.tls=true"
+      - "traefik.http.routers.backend-api-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.backend-docs.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend-docs.entrypoints=web"
+      - "traefik.http.routers.backend-docs-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend-docs-secure.entrypoints=websecure"
+      - "traefik.http.routers.backend-docs-secure.tls=true"
+      - "traefik.http.routers.backend-docs-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.backend-redoc.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/redoc`)"
+      - "traefik.http.routers.backend-redoc.entrypoints=web"
+      - "traefik.http.routers.backend-redoc-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/redoc`)"
+      - "traefik.http.routers.backend-redoc-secure.entrypoints=websecure"
+      - "traefik.http.routers.backend-redoc-secure.tls=true"
+      - "traefik.http.routers.backend-redoc-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.backend-api.middlewares=redirect-to-https"
+      - "traefik.http.routers.backend-docs.middlewares=redirect-to-https"
+      - "traefik.http.routers.backend-redoc.middlewares=redirect-to-https"
 
   postgres:
     image: postgres:16.3
@@ -60,16 +90,34 @@ services:
       - traefik
     ports:
       - 8080:8080
-    env_file:
-      - ./backend/.env
     networks:
       - app-network
+    env_file:
+      - ./backend/.env
     labels:
-      - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
+      - "traefik.enable=true"
+      - "traefik.docker.network=app-network"
+      - "traefik.http.routers.adminer.rule=Host(`db.rtmdemos.name.ng`)"
+      - "traefik.http.routers.adminer.entrypoints=web"
+      - "traefik.http.routers.adminer-secure.rule=Host(`db.rtmdemos.name.ng`)"
+      - "traefik.http.routers.adminer-secure.entrypoints=websecure"
+      - "traefik.http.routers.adminer-secure.tls=true"
+      - "traefik.http.routers.adminer-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.adminer.middlewares=redirect-to-https"
 
   traefik:
     image: traefik:v3.0.4
-    command: --api.insecure=true --providers.docker
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.letsencryptresolver.acme.tlschallenge=true
+      - --certificatesresolvers.letsencryptresolver.acme.email=rtmabiola@gmail.com
+      - --certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencryptresolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --accesslog
     ports:
       - '80:80'
       - '443:443'
@@ -80,10 +128,19 @@ services:
     env_file:
       - ./backend/.env
     labels:
-      - "traefik.http.routers.traefik.rule=Host(`proxy.${DOMAIN}`)"
+      - "traefik.enable=true"
+      - "traefik.docker.network=app-network"
+      - "traefik.http.routers.traefik.rule=Host(`proxy.rtmdemos.name.ng`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik-secure.rule=Host(`proxy.rtmdemos.name.ng`)"
+      - "traefik.http.routers.traefik-secure.entrypoints=websecure"
+      - "traefik.http.routers.traefik-secure.tls=true"
+      - "traefik.http.routers.traefik-secure.tls.certresolver=letsencryptresolver"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.traefik.middlewares=redirect-to-https"
 
 volumes:
-  postgress-db:  
+  postgress-db:
   letsencrypt:
 
 networks:
