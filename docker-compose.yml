@@ -12,7 +12,7 @@ services:
     networks:
       - app-network
     labels:
-      - "traefik.http.routers.site.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`) || Host(`www.${DOMAIN}`)"
     depends_on:
       - traefik
 
@@ -30,9 +30,9 @@ services:
     networks:
       - app-network
     labels:
-      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/docs`))"
-      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/redoc`))"
-      - "traefik.http.routers.site.rule=(Host(`${DOMAIN}`) && PathPrefix(`/api`))"
+      - "traefik.http.routers.backend_docs.rule=Host(`${DOMAIN}`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend_redoc.rule=Host(`${DOMAIN}`) && PathPrefix(`/redoc`)"
+      - "traefik.http.routers.backend_api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
 
   postgres:
     image: postgres:16.3
@@ -62,7 +62,7 @@ services:
     networks:
       - app-network
     labels:
-      - "traefik.http.routers.site.rule=Host(`db.${DOMAIN}`)" 
+      - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
 
   traefik:
     image: traefik:v3.0.4
@@ -77,7 +77,7 @@ services:
     env_file:
       - ./backend/.env
     labels:
-      - "traefik.http.routers.site.rule=Host(`proxy.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.rule=Host(`proxy.${DOMAIN}`)"
 
 volumes:
   postgress-db:  
