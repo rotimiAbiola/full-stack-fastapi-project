@@ -28,11 +28,13 @@ COPY . .
 # Set environment variables for pythonpath
 ENV PYTHONPATH=/app
 
+# Make the prestart script executable
+RUN chmod +x /app/prestart.sh
 # Run any prestart scripts
 RUN poetry run bash ./prestart.sh
 
 # Expose the application port
 EXPOSE 8000
 
-# Define the command to run the application
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Define the command to run the prestart script and the application
+CMD ["bash", "-c", "poetry run bash ./prestart.sh && poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000"]
