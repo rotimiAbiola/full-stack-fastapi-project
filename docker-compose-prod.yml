@@ -1,12 +1,12 @@
 services:
   frontend:
     build: ./frontend
+    container_name: frontend_c
     stdin_open: true
     tty: true
     restart: unless-stopped
     env_file:
       - ./frontend/.env
-      - ./backend/.env
     networks:
       - app-network
     labels:
@@ -121,10 +121,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./letsencrypt:/letsencrypt
-    networks:
-      - app-network
     env_file:
       - ./.env
+    networks:
+      - app-network
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=app-network"
