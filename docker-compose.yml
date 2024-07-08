@@ -6,15 +6,15 @@ services:
     restart: unless-stopped
     env_file:
       - ./frontend/.env
-      - ./backend/.env
+      - ./.env
     networks:
       - app-network
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=app-network"
-      - "traefik.http.routers.frontend.rule=Host(`rtmdemos.name.ng`)"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend-secure.rule=Host(`rtmdemos.name.ng`)"
+      - "traefik.http.routers.frontend-secure.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.frontend-secure.entrypoints=websecure"
       - "traefik.http.routers.frontend-secure.tls=true"
       - "traefik.http.routers.frontend-secure.tls.certresolver=letsencryptresolver"
@@ -31,26 +31,27 @@ services:
       - postgres
     env_file:
       - ./backend/.env
+      - ./.env
     networks:
       - app-network
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=app-network"
-      - "traefik.http.routers.backend-api.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend-api.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend-api.entrypoints=web"
-      - "traefik.http.routers.backend-api-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend-api-secure.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend-api-secure.entrypoints=websecure"
       - "traefik.http.routers.backend-api-secure.tls=true"
       - "traefik.http.routers.backend-api-secure.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.backend-docs.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend-docs.rule=Host(`${DOMAIN}`) && PathPrefix(`/docs`)"
       - "traefik.http.routers.backend-docs.entrypoints=web"
-      - "traefik.http.routers.backend-docs-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/docs`)"
+      - "traefik.http.routers.backend-docs-secure.rule=Host(`${DOMAIN}`) && PathPrefix(`/docs`)"
       - "traefik.http.routers.backend-docs-secure.entrypoints=websecure"
       - "traefik.http.routers.backend-docs-secure.tls=true"
       - "traefik.http.routers.backend-docs-secure.tls.certresolver=letsencryptresolver"
-      - "traefik.http.routers.backend-redoc.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/redoc`)"
+      - "traefik.http.routers.backend-redoc.rule=Host(`${DOMAIN}`) && PathPrefix(`/redoc`)"
       - "traefik.http.routers.backend-redoc.entrypoints=web"
-      - "traefik.http.routers.backend-redoc-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/redoc`)"
+      - "traefik.http.routers.backend-redoc-secure.rule=Host(`${DOMAIN}`) && PathPrefix(`/redoc`)"
       - "traefik.http.routers.backend-redoc-secure.entrypoints=websecure"
       - "traefik.http.routers.backend-redoc-secure.tls=true"
       - "traefik.http.routers.backend-redoc-secure.tls.certresolver=letsencryptresolver"
@@ -72,6 +73,7 @@ services:
       - postgress-db:/var/lib/postgresql/data
     env_file:
       - ./backend/.env
+      - ./.env
     ports:
       - '5432:5432'
     networks:
@@ -87,12 +89,13 @@ services:
       - app-network
     env_file:
       - ./backend/.env
+      - ./.env
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=app-network"
-      - "traefik.http.routers.adminer.rule=Host(`db.rtmdemos.name.ng`)"
+      - "traefik.http.routers.adminer.rule=Host(`db.${DOMAIN}`)"
       - "traefik.http.routers.adminer.entrypoints=web"
-      - "traefik.http.routers.adminer-secure.rule=Host(`db.rtmdemos.name.ng`)"
+      - "traefik.http.routers.adminer-secure.rule=Host(`db.${DOMAIN}`)"
       - "traefik.http.routers.adminer-secure.entrypoints=websecure"
       - "traefik.http.routers.adminer-secure.tls=true"
       - "traefik.http.routers.adminer-secure.tls.certresolver=letsencryptresolver"
@@ -128,15 +131,15 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=app-network"
-      - "traefik.http.routers.traefik.rule=Host(`proxy.rtmdemos.name.ng`)"
+      - "traefik.http.routers.traefik.rule=Host(`proxy.${DOMAIN}`)"
       - "traefik.http.routers.traefik.entrypoints=web"
-      - "traefik.http.routers.traefik-secure.rule=Host(`proxy.rtmdemos.name.ng`)"
+      - "traefik.http.routers.traefik-secure.rule=Host(`proxy.${DOMAIN}`)"
       - "traefik.http.routers.traefik-secure.entrypoints=websecure"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certresolver=letsencryptresolver"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.routers.traefik.middlewares=redirect-to-https"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8090"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
 volumes:
   postgress-db:
