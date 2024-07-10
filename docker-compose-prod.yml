@@ -21,8 +21,8 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.routers.frontend.middlewares=redirect-to-https"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
-      - "traefik.http.middlewares.www-redirect.redirectregex.regex=^https?://www\\.(.*)"
-      - "traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$1"
+      - "traefik.http.middlewares.www-redirect.redirectregex.regex=^http(s)?://www.rtmdemos.name.ng/(.*)"
+      - "traefik.http.middlewares.www-redirect.redirectregex.replacement=http$${1}://rtmdemos.name.ng/$${3}"
       - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
       - "traefik.http.routers.frontend-http.middlewares=redirect-to-https,www-redirect"
 
