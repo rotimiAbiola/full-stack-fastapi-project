@@ -7,11 +7,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./frontend/.env
-    networks:
-      - app-network
+    # networks:
+    #   - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=app-network"
+      # - "traefik.docker.network=app-network"
       - "traefik.http.routers.frontend.rule=Host(`rtmdemos.name.ng`)"
       - "traefik.http.routers.frontend.entrypoints=web"
       - "traefik.http.routers.frontend-secure.rule=Host(`rtmdemos.name.ng`)"
@@ -21,6 +21,10 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
       - "traefik.http.routers.frontend.middlewares=redirect-to-https"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+      - "traefik.http.middlewares.www-redirect.redirectregex.regex=^https?://www\\.(.*)"
+      - "traefik.http.middlewares.www-redirect.redirectregex.replacement=https://$1"
+      - "traefik.http.middlewares.www-redirect.redirectregex.permanent=true"
+      - "traefik.http.routers.frontend-http.middlewares=redirect-to-https,www-redirect"
 
   backend:
     build: ./backend
@@ -31,11 +35,11 @@ services:
       - postgres
     env_file:
       - ./backend/.env
-    networks:
-      - app-network
+    # networks:
+    #   - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=app-network"
+      # - "traefik.docker.network=app-network"
       - "traefik.http.routers.backend-api.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend-api.entrypoints=web"
       - "traefik.http.routers.backend-api-secure.rule=Host(`rtmdemos.name.ng`) && PathPrefix(`/api`)"
@@ -74,8 +78,8 @@ services:
       - ./backend/.env
     ports:
       - '5432:5432'
-    networks:
-      - app-network
+    # networks:
+    #   - app-network
 
   adminer:
     image: adminer
@@ -83,13 +87,13 @@ services:
     depends_on:
       - postgres
       - traefik
-    networks:
-      - app-network
+    # networks:
+    #   - app-network
     env_file:
       - ./backend/.env
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=app-network"
+      # - "traefik.docker.network=app-network"
       - "traefik.http.routers.adminer.rule=Host(`db.rtmdemos.name.ng`)"
       - "traefik.http.routers.adminer.entrypoints=web"
       - "traefik.http.routers.adminer-secure.rule=Host(`db.rtmdemos.name.ng`)"
@@ -123,11 +127,11 @@ services:
       - ./letsencrypt:/letsencrypt
     env_file:
       - ./.env
-    networks:
-      - app-network
+    # networks:
+    #   - app-network
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=app-network"
+      # - "traefik.docker.network=app-network"
       - "traefik.http.routers.traefik.rule=Host(`proxy.rtmdemos.name.ng`)"
       - "traefik.http.routers.traefik.entrypoints=web"
       - "traefik.http.routers.traefik-secure.rule=Host(`proxy.rtmdemos.name.ng`)"
@@ -142,6 +146,6 @@ volumes:
   postgress-db:
   letsencrypt:
 
-networks:
-  app-network:
-    external: true
+# networks:
+#   app-network:
+#     external: true
